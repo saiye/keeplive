@@ -1,9 +1,9 @@
-package main
+package request
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
-	"net/url"
+	"io"
 	"strings"
 	"testing"
 )
@@ -12,30 +12,32 @@ func TestHTTPRequest(t *testing.T) {
 	type args struct {
 		method  string
 		urlStr  string
-		params  url.Values
+		params  map[string]interface{}
 		headers map[string]string
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
+		name           string
+		args           args
+		want           string
+		wantStatusCode int
+		wantErr        bool
 	}{
 		{
 			name: "post-test",
 			args: args{
-				method: "POST",
+				method: POST,
 				urlStr: "https://api.mch.weixin.qq.com/v3/pay/transactions/app",
-				params: url.Values{
-					"appid": {"111111111"},
+				params: map[string]interface{}{
+					"appid": "111111111",
 				},
 				headers: map[string]string{
 					"Content-Type": "application/json",
 					"Accept":       "application/json",
 				},
 			},
-			want:    "machid",
-			wantErr: false,
+			want:           "mchid",
+			wantStatusCode: 400,
+			wantErr:        false,
 		},
 	}
 	type Info struct {
@@ -47,11 +49,24 @@ func TestHTTPRequest(t *testing.T) {
 		Message string `json:"message"`
 	}
 	var info Info
+	var readerData io.Reader
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := HTTPRequest(tt.args.method, tt.args.urlStr, tt.args.params, tt.args.headers)
+			if tt.args.params != nil {
+				jsonV, err := json.Marshal(tt.args.params)
+				if err != nil {
+					t.Errorf("Json error = %v", err)
+					return
+				}
+				readerData = bytes.NewReader(jsonV)
+			}
+			got, statusCode, err := HTTPRequest(tt.args.method, tt.args.urlStr, readerData, &tt.args.headers)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("HTTPRequest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if statusCode != tt.wantStatusCode {
+				t.Errorf("HTTPRequest() StatusCode = %v, wantStatusCode %v", statusCode, tt.wantStatusCode)
 				return
 			}
 			err2 := json.Unmarshal([]byte(got), &info)
@@ -59,9 +74,9 @@ func TestHTTPRequest(t *testing.T) {
 				t.Errorf("json Unmarshal err %v", err2)
 				return
 			}
-			fmt.Println("info.Message:", info.Message)
 			if !strings.Contains(info.Message, tt.want) {
 				t.Errorf("HTTPRequest() got = %v, want %v", info.Message, tt.want)
+				return
 			}
 		})
 	}
