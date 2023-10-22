@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	// 创建一个定时器，每隔10秒触发一次
-	ticker := time.NewTicker(10 * time.Second)
+	// 创建一个定时器，每隔60秒触发一次
+	ticker := time.NewTicker(60 * time.Second)
 	// 在主函数退出前停止定时器
 	defer ticker.Stop()
 

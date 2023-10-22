@@ -1,5 +1,7 @@
 [app]
 env=local
+#读取警报关键词
+keyword=
 
 [dingtalk]
 access_token=

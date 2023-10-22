@@ -27,9 +27,10 @@ func ReportMessage(configDir string) error {
 	if err != nil {
 		return err
 	}
-	env := cfg.GetString("app.env")         // 读取配置
-	keyword := cfg.GetString("app.keyword") // 读取警报关键词
-	messageList := GetAllReportInfo(1)
+	env := cfg.GetString("app.env")          // 读取配置
+	keyword := cfg.GetString("app.keyword")  // 读取警报关键词
+	percent := cfg.GetFloat64("app.percent") // 警告百分比0-100
+	messageList := GetAllReportInfo(percent)
 	phoneList := GetPhoneList(cfg.GetString("dingtalk.phone_list"))
 	var message string = ""
 	for _, msg := range messageList {
