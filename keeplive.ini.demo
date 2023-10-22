@@ -1,6 +1,11 @@
+[app]
+env=local
+
 [dingtalk]
 access_token=
 secret=
+#@手机号，多个则英文,号分割，空的话@所有人
+phone_list=
 
 
 

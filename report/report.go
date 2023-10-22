@@ -31,7 +31,7 @@ func ReportMessage(configDir string) error {
 	keyword := cfg.GetString("app.keyword") // 读取警报关键词
 	messageList := GetAllReportInfo(1)
 	phoneList := GetPhoneList(cfg.GetString("dingtalk.phone_list"))
-	message := ""
+	var message string = ""
 	for _, msg := range messageList {
 		receiver := &TextMessage{
 			At: AtContent{
@@ -46,11 +46,11 @@ func ReportMessage(configDir string) error {
 		}
 		res := receiver.Send(cfg)
 		if res != nil {
-			messag += res.Error()
+			message += res.Error()
 		}
 	}
-	if messag != "" {
-		return errors.New(messag)
+	if message != "" {
+		return errors.New(message)
 	}
 	return nil
 }
