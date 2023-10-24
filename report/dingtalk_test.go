@@ -1,6 +1,7 @@
 package report
 
 import (
+	"fmt"
 	"game_go/system"
 	"testing"
 )
@@ -8,24 +9,28 @@ import (
 func TestTextMessage_Send(t *testing.T) {
 
 	t.Run("test", func(t *testing.T) {
+		cfg, err := system.NewConfig("../", "keeplive", "ini")
+		if err != nil {
+			t.Errorf("read config Error: %v", err)
+			return
+		}
+		keyword := cfg.GetString("dingtalk.keyword") // 读取警报关键词
+		env := cfg.GetString("app.env")              // 读取配置
+
 		receiver := &TextMessage{
 			At: AtContent{
 				AtMobiles: []string{
 					"",
 				},
 				AtUserIds: nil,
-				IsAtAll:   true,
+				IsAtAll:   false,
 			},
 			Text: TextContent{
-				Content: "error:我来了",
+				Content: fmt.Sprintf("【环境:%s】%s:%s", env, keyword, "hello world"),
 			},
 			MsgType: "text",
 		}
-		cfg, err := system.NewConfig("../", "keeplive", "ini")
-		if err != nil {
-			t.Errorf("read config Error: %v", err)
-			return
-		}
+
 		res := receiver.Send(cfg)
 		if res != nil {
 			t.Errorf("res: %v", res)

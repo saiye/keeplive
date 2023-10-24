@@ -3,36 +3,75 @@ package report
 import (
 	"errors"
 	"fmt"
+	"game_go/request"
 	"game_go/system"
 	"github.com/spf13/viper"
 	"strings"
 )
 
-var _config *viper.Viper
-
-func GetConfig(configDir string) (*viper.Viper, error) {
-	if _config == nil {
-		cfg, err := system.NewConfig(configDir, "keeplive", "ini")
-		if err != nil {
-			return nil, err
-		}
-		_config = cfg
-	}
-	return _config, nil
-}
-
-// ReportMessage 报告系统状态
-func ReportMessage(configDir string) error {
-	cfg, err := GetConfig(configDir)
+// Report 报告系统状态
+func Report(cfg *viper.Viper) error {
+	//报告系统消息
+	err := ReportSystemInfo(cfg)
 	if err != nil {
 		return err
 	}
+	//报告服务状态
+	return nil
+}
+
+// ReportHttpServiceInfo 报告服务状态
+func ReportHttpServiceInfo(cfg *viper.Viper) error {
+
+	count := cfg.GetInt("check.count") // 定时器单位秒[1-N]
+	res := make([]string, 0)
+	if count > 0 {
+		for i := 1; i <= count; i++ {
+			url := cfg.GetString(fmt.Sprintf("check.url%d", i))
+			if url != "" {
+				res = append(res, url)
+			}
+		}
+	}
+	header := map[string]string{
+		"Content-Type": "application/json",
+		"Accept":       "application/json",
+	}
+	output := make([]string, 0)
+	ch := make(chan string)
+	defer func() {
+		close(ch)
+	}()
+	for _, url := range res {
+		go func() {
+			var s string
+			resp, statusCode, err := request.HTTPRequest(request.POST, url, strings.NewReader("{}"), &header)
+			if statusCode != 200 || err != nil {
+				if err != nil {
+					s = err.Error()
+				}
+				ch <- fmt.Sprintf("statusCode:%d,err:%s,resp:%s", statusCode, s, resp)
+			}
+		}()
+	}
+	output = append(output, <-ch)
+	if len(output) > 0 {
+		return errors.New(strings.Join(output, " "))
+	}
+	return nil
+}
+
+// ReportSystemInfo 报告系统消息
+func ReportSystemInfo(cfg *viper.Viper) error {
 	env := cfg.GetString("app.env")          // 读取配置
-	keyword := cfg.GetString("app.keyword")  // 读取警报关键词
 	percent := cfg.GetFloat64("app.percent") // 警告百分比0-100
 	messageList := GetAllReportInfo(percent)
 	phoneList := GetPhoneList(cfg.GetString("dingtalk.phone_list"))
-	var message string = ""
+	keyword := cfg.GetString("dingtalk.keyword") // 读取警报关键词
+	message := ""
+	if percent > 95 {
+		percent = 95
+	}
 	for _, msg := range messageList {
 		receiver := &TextMessage{
 			At: AtContent{
@@ -41,7 +80,7 @@ func ReportMessage(configDir string) error {
 				IsAtAll:   len(phoneList) == 0,
 			},
 			Text: TextContent{
-				Content: fmt.Sprintf("环境:%s,message:%s:%s", env, keyword, msg),
+				Content: fmt.Sprintf("【环境:%s】%s:%s", env, keyword, msg),
 			},
 			MsgType: "text",
 		}

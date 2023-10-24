@@ -84,16 +84,18 @@ func (receiver *TextMessage) Send(config *viper.Viper) error {
 
 	respJson, statusCode, err := request.HTTPRequest(request.POST, url, readerData, &header)
 
-	var resp ResInfo
+	if respJson != "" {
+		var resp ResInfo
 
-	err2 := json.Unmarshal([]byte(respJson), &resp)
-	if err2 != nil {
-		return errors.New(fmt.Sprintf("json Unmarshal err %v,jsonRes:%v", err2, respJson))
-	}
+		err2 := json.Unmarshal([]byte(respJson), &resp)
+		if err2 != nil {
+			return errors.New(fmt.Sprintf("debug:json Unmarshal err %v,jsonRes:%v", err2, respJson))
+		}
 
-	if resp.ErrCode != 0 || err != nil || statusCode != 200 {
-		sendData := string(jsonV)
-		return errors.New(fmt.Sprintf("消息报告失败：resp %v,statusCode:%v ,参数 %v,url:%v", resp, statusCode, sendData, url))
+		if resp.ErrCode != 0 || err != nil || statusCode != 200 {
+			sendData := string(jsonV)
+			return errors.New(fmt.Sprintf("debug:消息报告失败：resp %v,statusCode:%v ,参数 %v,url:%v", resp, statusCode, sendData, url))
+		}
 	}
 	return err
 }

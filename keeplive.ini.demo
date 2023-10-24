@@ -1,14 +1,17 @@
 [app]
+##环境标记,一般是机器名称
 env=local
-#读取警报关键词
-keyword=
+#cpu,Memory警告百分比0-95
+percent=50
+#定时器时间单位秒
+second=60
 
 [dingtalk]
+#钉钉token
 access_token=
+#钉钉密钥
 secret=
-#@手机号，多个则英文,号分割，空的话@所有人
-phone_list=
-
-
-
-
+#空的话@所有人,非空@手机号，多个则英文,号分割
+phone_list=118XXX,XXX
+#读取警报关键词，自己在钉钉机器人控制面板定义
+keyword=danger

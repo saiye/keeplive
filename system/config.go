@@ -5,6 +5,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+var _cfg *viper.Viper
+
+func GetCfg(dir string) (*viper.Viper, error) {
+	_cfg, err := NewConfig(dir, "keeplive", "ini")
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return _cfg, err
+}
+
 func NewConfig(dir string, fileName string, fileType string) (*viper.Viper, error) {
 	if dir == "" {
 		dir = "./"

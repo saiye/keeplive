@@ -1,25 +1,29 @@
 package report
 
-import "testing"
+import (
+	"game_go/system"
+	"testing"
+)
 
-func TestReportMessage(t *testing.T) {
-	type args struct {
-		configDir string
+func TestReportHttpServiceInfo(t *testing.T) {
+	cfg, err1 := system.GetCfg("../")
+	if err1 != nil {
+		t.Errorf("system.NewConfig error = %v, ", err1)
 	}
 	tests := []struct {
-		name string
-		args args
+		name    string
+		wantErr bool
 	}{
 		{
-			name: "system info",
-			args: args{
-				configDir: "../",
-			},
+			name:    "test1",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ReportMessage(tt.args.configDir)
+			if err := ReportHttpServiceInfo(cfg); (err != nil) != tt.wantErr {
+				t.Errorf("ReportHttpServiceInfo() error = %v, wantErr %v", err, tt.wantErr)
+			}
 		})
 	}
 }

@@ -24,11 +24,12 @@ func HTTPRequest(method, urlStr string, params io.Reader, headers *map[string]st
 		}
 	}
 	resp, err := client.Do(req)
-	if err != nil {
-		return "", 0, err
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
 	}
-	defer resp.Body.Close()
-
+	if err != nil {
+		return "", resp.StatusCode, err
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", resp.StatusCode, err
