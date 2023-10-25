@@ -40,7 +40,10 @@ func main() {
 				}
 			}()
 		case <-quit:
-			fmt.Println("The [keep live] service exits safely！")
+			err1 := report.SendTextMessage(cfg, []string{"keep live 安全退出！"})
+			if err1 != nil {
+				fmt.Println(err1)
+			}
 			return
 		}
 	}

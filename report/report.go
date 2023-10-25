@@ -19,12 +19,12 @@ type UrlInfo struct {
 func Report(cfg *viper.Viper) error {
 	var msg string
 	//报告系统消息
-	err := ReportSystemInfo(cfg)
+	err := SystemInfo(cfg)
 	if err != nil {
 		msg += err.Error()
 	}
 	//报告服务状态
-	err2 := ReportHttpServiceInfo(cfg)
+	err2 := HttpServiceInfo(cfg)
 	if err2 != nil {
 		msg += err2.Error()
 	}
@@ -34,7 +34,8 @@ func Report(cfg *viper.Viper) error {
 	return nil
 }
 
-func ReportHttpServiceInfo(cfg *viper.Viper) error {
+// HttpServiceInfo 报告服务状态
+func HttpServiceInfo(cfg *viper.Viper) error {
 	messageList := GetHttpServiceErrorInfo(cfg)
 	if len(messageList) > 0 {
 		//do report
@@ -46,7 +47,7 @@ func ReportHttpServiceInfo(cfg *viper.Viper) error {
 	return nil
 }
 
-// ReportHttpServiceInfo 报告服务状态
+// GetHttpServiceErrorInfo 报告服务状态
 func GetHttpServiceErrorInfo(cfg *viper.Viper) []string {
 	count := cfg.GetInt("check.count") // url 数量为n
 	res := make([]*UrlInfo, 0)
@@ -85,8 +86,8 @@ func GetHttpServiceErrorInfo(cfg *viper.Viper) []string {
 	return output
 }
 
-// ReportSystemInfo 报告系统消息
-func ReportSystemInfo(cfg *viper.Viper) error {
+// SystemInfo 报告系统消息
+func SystemInfo(cfg *viper.Viper) error {
 	percent := cfg.GetFloat64("app.percent") // 警告百分比0-95
 	if percent > 95 {
 		percent = 95

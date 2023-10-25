@@ -111,7 +111,7 @@ func SendTextMessage(cfg *viper.Viper, messageList []string) error {
 	output := make([]string, 0)
 	for _, msg := range messageList {
 		wg.Add(1)
-		go func() {
+		go func(msg string) {
 			defer wg.Done()
 			receiver := &TextMessage{
 				At: AtContent{
@@ -128,7 +128,7 @@ func SendTextMessage(cfg *viper.Viper, messageList []string) error {
 			if err != nil {
 				output = append(output, err.Error())
 			}
-		}()
+		}(msg)
 	}
 	wg.Wait()
 	if len(output) > 0 {
