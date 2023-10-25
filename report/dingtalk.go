@@ -12,6 +12,8 @@ import (
 	"game_go/request"
 	"github.com/spf13/viper"
 	"net/url"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -98,4 +100,39 @@ func (receiver *TextMessage) Send(config *viper.Viper) error {
 		}
 	}
 	return err
+}
+
+// SendTextMessage 发送钉钉的text 消息
+func SendTextMessage(cfg *viper.Viper, messageList []string) error {
+	env := cfg.GetString("app.env") // 读取配置
+	phoneList := GetPhoneList(cfg.GetString("dingtalk.phone_list"))
+	keyword := cfg.GetString("dingtalk.keyword") // 读取警报关键词
+	var wg = &sync.WaitGroup{}
+	output := make([]string, 0)
+	for _, msg := range messageList {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			receiver := &TextMessage{
+				At: AtContent{
+					AtMobiles: phoneList,
+					AtUserIds: nil,
+					IsAtAll:   len(phoneList) == 0,
+				},
+				Text: TextContent{
+					Content: fmt.Sprintf("【环境:%s】%s:%s", env, keyword, msg),
+				},
+				MsgType: "text",
+			}
+			err := receiver.Send(cfg)
+			if err != nil {
+				output = append(output, err.Error())
+			}
+		}()
+	}
+	wg.Wait()
+	if len(output) > 0 {
+		return errors.New(strings.Join(output, "\n"))
+	}
+	return nil
 }
