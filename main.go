@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 	second := cfg.GetInt("app.second") // 定时器单位秒[1-N]
-	if second == 0 {
+	if second <= 0 {
 		second = 60
 	}
 	// 创建一个定时器，每隔60秒触发一次

@@ -7,6 +7,7 @@ import (
 	"game_go/system"
 	"github.com/spf13/viper"
 	"strings"
+	"sync"
 )
 
 // Report 报告系统状态
@@ -23,7 +24,7 @@ func Report(cfg *viper.Viper) error {
 // ReportHttpServiceInfo 报告服务状态
 func ReportHttpServiceInfo(cfg *viper.Viper) error {
 
-	count := cfg.GetInt("check.count") // 定时器单位秒[1-N]
+	count := cfg.GetInt("check.count") // url 数量为n
 	res := make([]string, 0)
 	if count > 0 {
 		for i := 1; i <= count; i++ {
@@ -37,26 +38,31 @@ func ReportHttpServiceInfo(cfg *viper.Viper) error {
 		"Content-Type": "application/json",
 		"Accept":       "application/json",
 	}
+	var wg = &sync.WaitGroup{}
+
 	output := make([]string, 0)
-	ch := make(chan string)
-	defer func() {
-		close(ch)
-	}()
+	ch := make(chan string, 2)
 	for _, url := range res {
-		go func() {
-			var s string
+		wg.Add(1)
+		go func(url string) {
 			resp, statusCode, err := request.HTTPRequest(request.POST, url, strings.NewReader("{}"), &header)
+			var s string
 			if statusCode != 200 || err != nil {
 				if err != nil {
 					s = err.Error()
 				}
 				ch <- fmt.Sprintf("statusCode:%d,err:%s,resp:%s", statusCode, s, resp)
 			}
-		}()
+			defer wg.Done()
+		}(url)
 	}
 	output = append(output, <-ch)
+	defer func() {
+		wg.Wait()
+		close(ch)
+	}()
 	if len(output) > 0 {
-		return errors.New(strings.Join(output, " "))
+		return errors.New(strings.Join(output, "\n"))
 	}
 	return nil
 }
