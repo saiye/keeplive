@@ -23,9 +23,10 @@ build:
 	$(GOBUILD) -o $(BINARY_NAME)
 
 build-linux:
-    GOOS=linux GOARCH=amd64 $(GOBUILD)  -o $(LINUX_BINARY_NAME)
+    GOOS=linux GOARCH=amd64 $(GOBUILD) -ldflags="-s -w" -o $(LINUX_BINARY_NAME)
 
-# GOOS=linux GOARCH=amd64 go build  -o keeplive
+#GOOS=linux GOARCH=amd64 go build  -ldflags="-s -w" -o keeplive
+
 clean:
 	rm -f $(BINARY_NAME) $(LINUX_BINARY_NAME)
 .PHONY: all build build-linux clean
