@@ -19,5 +19,8 @@ keyword=danger
 [check]
 #url 数量为n则配置url1-url{n}
 count=2
-url1=http://g.xxx.com/xxx
-url2=http://xxx.com/aaa
+name1=phpServer
+url1=http://p.dev.com/check
+
+name2=gameServer
+url2=url1=http://abc.dev.com/check
