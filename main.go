@@ -6,6 +6,7 @@ import (
 	"game_go/system"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -26,8 +27,9 @@ func main() {
 	ticker := time.NewTicker(time.Duration(second) * time.Second)
 	// 在主函数退出前停止定时器
 	defer ticker.Stop()
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, syscall.SIGTERM)
 	// 启动一个无限循环来处理定时事件
 	for {
 		select {
