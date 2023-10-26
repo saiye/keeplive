@@ -1,0 +1,14 @@
+[Unit]
+Description=keep live watch
+After=network.target
+
+[Service]
+ExecStart=/usr/local/keeplive/keeplive
+WorkingDirectory=/usr/local/keeplive/
+User=www
+Restart=always
+StartLimitInterval=0
+RestartSec=3
+SyslogIdentifier=keeplive
+[Install]
+WantedBy=multi-user.target
