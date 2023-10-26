@@ -11,12 +11,9 @@ import (
 )
 
 func main() {
-	cfg, err := system.GetCfg("./")
+	cfg, err := system.GetCfg("./conf")
 	if err != nil {
-		cfg, err = system.GetCfg("/etc/")
-		if err != nil {
-			fmt.Errorf("open keeplive config err:%v", err)
-		}
+		fmt.Errorf("open keeplive config err:%v", err)
 		return
 	}
 	second := cfg.GetInt("app.second") // 定时器单位秒[1-N]
