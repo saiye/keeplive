@@ -5,7 +5,6 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -38,15 +37,6 @@ type TextContent struct {
 type ResInfo struct {
 	ErrCode int64  `json:"errcode"`
 	ErrMsg  string `json:"errmsg"`
-}
-
-func HmacSha256(key, data string) string {
-
-	hash := hmac.New(sha256.New, []byte(key)) //创建对应的sha256哈希加密算法
-
-	hash.Write([]byte(data))
-
-	return hex.EncodeToString(hash.Sum([]byte("")))
 }
 
 func (receiver *SecretInfo) MakeSign(timestamp int64) string {

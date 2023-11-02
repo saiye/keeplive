@@ -24,7 +24,7 @@ func ReportSystemMemory(minPercent float64) string {
 // ReportSystemCpu 报告系统cpu使用
 func ReportSystemCpu(minPercent float64) string {
 	var info string
-	percent, err := cpu.Percent(time.Duration(100)*time.Millisecond, false)
+	percent, err := cpu.Percent(time.Second, false)
 	if err != nil {
 		info = fmt.Sprintf("无法获取CPU使用情况：%v\n", err.Error())
 	} else {
